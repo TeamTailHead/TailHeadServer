@@ -1,5 +1,5 @@
 const config = {
-  testMatch: ["**/test/**/*.+(ts)"],
+  testMatch: ["**/test/**/*.+(ts)", "**/?(*.)+(spec|test).+(ts)"],
   testPathIgnorePatterns: ["/node_modules/"],
   transform: {
     "^.+\\.ts?$": "ts-jest",
