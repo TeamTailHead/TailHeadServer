@@ -69,5 +69,6 @@ module.exports = {
     "simple-import-sort/imports": "error",
     "simple-import-sort/exports": "error",
     "eol-last": ["error", "always"],
+    "@typescript-eslint/no-empty-function": "warn",
   },
 };
