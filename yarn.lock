@@ -628,10 +628,10 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
-"@tailhead/communicator@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@tailhead/communicator/-/communicator-0.0.1.tgz#ac8ebdca83fd6af8d3d446980026e74134f01df5"
-  integrity sha512-F2s63Mn6Xsx+bTm8wDcpONt+wTDFON/o9EbDfGzYHkt8j+XgxsXgadt9yfF5QYBaGhNRfjKWAtv9quce5TlJZw==
+"@tailhead/communicator@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@tailhead/communicator/-/communicator-0.0.3.tgz#377b4fa4cbed359d1f3ca64e45254e0069183f17"
+  integrity sha512-8UL68uK+SNnaeSd6nvtHOqmUlHDbYSQt5UFCl9b7LFdtuBjxh+08qVhsMT+52F1tKwOgQa8kVFnPlHD2EKuM8g==
   dependencies:
     nanoid "^3.0.0"
 
