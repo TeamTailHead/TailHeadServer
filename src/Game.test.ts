@@ -30,6 +30,19 @@ describe("Game", () => {
       adminId: "playerId1",
     });
   });
+
+  test("should leave", () => {
+    const { game, sendAllFn } = createGame();
+    game.join("playerId1", "nick1");
+    game.join("playerId2", "nick2");
+    game.leave("playerId1");
+
+    expect(sendAllFn).toBeCalledTimes(3);
+    expect(sendAllFn).toHaveBeenNthCalledWith(3, "lobbyInfo", {
+      players: [{ id: "playerId2", nickname: "nick2" }],
+      adminId: "playerId2",
+    });
+  });
 });
 
 function createGame() {
