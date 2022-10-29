@@ -42,10 +42,10 @@ export default class Game {
 
     this.players.splice(index, 1);
     if (leavedPlayerId == this.adminPlayerId) {
-      this.adminPlayerId = null;
-
-      if (this.players.length != 0) {
+      if (this.players.length > 0) {
         this.adminPlayerId = this.players[0].id;
+      } else {
+        this.adminPlayerId = null;
       }
     }
 
