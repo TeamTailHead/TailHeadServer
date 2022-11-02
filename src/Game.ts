@@ -38,7 +38,24 @@ export default class Game {
     if (index == -1) {
       return;
     }
+    const leavedPlayerId = this.players[index].id;
+
     this.players.splice(index, 1);
+    if (leavedPlayerId == this.adminPlayerId) {
+      if (this.players.length > 0) {
+        this.adminPlayerId = this.players[0].id;
+      } else {
+        this.adminPlayerId = null;
+      }
+    }
+
+    this.sendAll("lobbyInfo", {
+      players: this.players.map((player) => ({
+        id: player.id,
+        nickname: player.nickname,
+      })),
+      adminId: this.adminPlayerId ?? "",
+    });
   }
 }
 
