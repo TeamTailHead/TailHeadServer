@@ -1,4 +1,5 @@
 import { ServerCommunicator } from "@tailhead/communicator";
+import { PlayerChat } from "@tailhead/communicator/dist/message/serverMessage";
 
 interface WordChecker {
   isWordExists(word: string): boolean;
@@ -8,7 +9,11 @@ export default class Game {
   players: Player[];
   adminPlayerId: string | null;
 
-  constructor(private sendAll: ServerCommunicator["sendAll"], private wordChecker: WordChecker) {
+  constructor(
+    private sendAll: ServerCommunicator["sendAll"],
+    private sendOne: ServerCommunicator["sendOne"],
+    private wordChecker: WordChecker,
+  ) {
     this.players = [];
     this.adminPlayerId = null;
   }
@@ -30,6 +35,18 @@ export default class Game {
         nickname: player.nickname,
       })),
       adminId: this.adminPlayerId ?? "",
+    });
+  }
+
+  PlayerChat(playerId: string, content: string) {
+    const sendPlayer = this.players.find((player) => player.id === playerId);
+    if (!sendPlayer) {
+      throw new Error("유령이다 유령");
+    }
+    const playersWithoutSender = this.players.filter((player) => player.id !== playerId);
+
+    playersWithoutSender.forEach((player) => {
+      this.sendOne(player.id, "playerChat", { playerId, nickname: sendPlayer.nickname, content });
     });
   }
 

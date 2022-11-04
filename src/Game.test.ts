@@ -55,19 +55,32 @@ describe("Game", () => {
       adminId: "playerId2",
     });
   });
+
+  test("chat room member", () => {
+    const { game, sendOneFn } = createGame();
+    game.join("playerId1", "nick1");
+    game.join("playerId2", "nick2");
+    game.PlayerChat("playerId1", "안녕하세요");
+
+    expect(sendOneFn).toBeCalledTimes(1);
+    expect(sendOneFn).toHaveBeenNthCalledWith(3, "Playerchat", {
+      players: [{ id: "playerId2", nickname: "nick2", content: "안녕하세요" }],
+    });
+  });
 });
 
 function createGame() {
   const sendAllFn = jest.fn();
+  const sendOneFn = jest.fn();
   const isWordExistsFn = jest.fn();
 
   isWordExistsFn.mockReturnValue(true);
 
-  const game = new Game(sendAllFn, {
+  const game = new Game(sendAllFn, sendOneFn, {
     isWordExists(_word) {
       return true;
     },
   });
 
-  return { game, sendAllFn, isWordExistsFn };
+  return { game, sendAllFn, sendOneFn, isWordExistsFn };
 }
