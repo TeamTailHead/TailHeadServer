@@ -60,11 +60,13 @@ describe("Game", () => {
     const { game, sendOneFn } = createGame();
     game.join("playerId1", "nick1");
     game.join("playerId2", "nick2");
-    game.PlayerChat("playerId1", "안녕하세요");
+    game.playerChat("playerId1", "안녕하세요");
 
     expect(sendOneFn).toBeCalledTimes(1);
-    expect(sendOneFn).toHaveBeenNthCalledWith(3, "Playerchat", {
-      players: [{ id: "playerId2", nickname: "nick2", content: "안녕하세요" }],
+    expect(sendOneFn).toHaveBeenNthCalledWith(1, "playerId2", "playerChat", {
+      content: "안녕하세요",
+      nickname: "nick1",
+      playerId: "playerId1",
     });
   });
 });

@@ -1,5 +1,4 @@
 import { ServerCommunicator } from "@tailhead/communicator";
-import { PlayerChat } from "@tailhead/communicator/dist/message/serverMessage";
 
 interface WordChecker {
   isWordExists(word: string): boolean;
@@ -38,7 +37,7 @@ export default class Game {
     });
   }
 
-  PlayerChat(playerId: string, content: string) {
+  playerChat(playerId: string, content: string) {
     const sendPlayer = this.players.find((player) => player.id === playerId);
     if (!sendPlayer) {
       throw new Error("유령이다 유령");
