@@ -22,7 +22,7 @@ async function main() {
   });
 
   communicator.onReceive("sendChat", (clientId, data) => {
-    game.PlayerChat(clientId, data.content);
+    game.playerChat(clientId, data.content);
   });
 
   // communicator.onReceive("startGame", (_clientId, data) => {
