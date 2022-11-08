@@ -10,10 +10,7 @@ export default class LobbyService {
     if (!sendPlayer) {
       throw new Error("유령이다 유령");
     }
-    const playersWithoutSender = this.playerService.getPlayers().filter((player) => player.id !== playerId);
 
-    playersWithoutSender.forEach((player) => {
-      this.communicator.sendOne(player.id, "playerChat", { playerId, nickname: sendPlayer.nickname, content });
-    });
+    this.communicator.sendAll("playerChat", { playerId, nickname: sendPlayer.nickname, content });
   }
 }
