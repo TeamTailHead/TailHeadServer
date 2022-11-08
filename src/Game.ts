@@ -1,88 +1,37 @@
 import { ServerCommunicator } from "@tailhead/communicator";
 
+import PlayerService from "./PlayerService";
+
 interface WordChecker {
   isWordExists(word: string): boolean;
 }
 
 export default class Game {
-  players: Player[];
-  adminPlayerId: string | null;
-
   constructor(
-    private sendAll: ServerCommunicator["sendAll"],
-    private sendOne: ServerCommunicator["sendOne"],
+    private communicator: ServerCommunicator,
+    private playerService: PlayerService,
     private wordChecker: WordChecker,
-  ) {
-    this.players = [];
-    this.adminPlayerId = null;
-  }
+  ) {}
 
-  join(playerId: string, nickname: string) {
-    const newPlayer: Player = {
-      id: playerId,
-      nickname,
-      score: 0,
-    };
-    this.players.push(newPlayer);
-    if (this.adminPlayerId == null) {
-      this.adminPlayerId = playerId;
-    }
+  start() {
+    this.communicator.onReceive("join", (playerId, data) => {
+      this.playerService.join(playerId, data.nickname);
+    });
 
-    this.sendAll("lobbyInfo", {
-      players: this.players.map((player) => ({
-        id: player.id,
-        nickname: player.nickname,
-      })),
-      adminId: this.adminPlayerId ?? "",
+    this.communicator.onReceive("exit", (playerId) => {
+      this.playerService.leave(playerId);
     });
   }
 
   playerChat(playerId: string, content: string) {
-    const sendPlayer = this.players.find((player) => player.id === playerId);
+    const sendPlayer = this.playerService.getPlayer(playerId);
     if (!sendPlayer) {
       throw new Error("유령이다 유령");
     }
-    const playersWithoutSender = this.players.filter((player) => player.id !== playerId);
+    const playersWithoutSender = this.playerService.getPlayers().filter((player) => player.id !== playerId);
 
     playersWithoutSender.forEach((player) => {
-      this.sendOne(player.id, "playerChat", { playerId, nickname: sendPlayer.nickname, content });
-    });
-  }
-
-  leave(playerId: string) {
-    const index = this.players.findIndex((player) => player.id === playerId);
-    if (index == -1) {
-      return;
-    }
-    const leavedPlayerId = this.players[index].id;
-
-    this.players.splice(index, 1);
-    if (leavedPlayerId == this.adminPlayerId) {
-      if (this.players.length > 0) {
-        this.adminPlayerId = this.players[0].id;
-      } else {
-        this.adminPlayerId = null;
-      }
-    }
-
-    this.sendAll("lobbyInfo", {
-      players: this.players.map((player) => ({
-        id: player.id,
-        nickname: player.nickname,
-      })),
-      adminId: this.adminPlayerId ?? "",
+      this.communicator.sendOne(player.id, "playerChat", { playerId, nickname: sendPlayer.nickname, content });
     });
   }
 }
-
-interface Player {
-  id: string;
-  nickname: string;
-  score: number;
-}
-
-// const noopFunction = () => {
-//   throw new Error("핸들러가 설정되지 않음!");
-// };
-
-//

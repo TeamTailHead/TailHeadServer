@@ -32,6 +32,14 @@ export default class PlayerService {
     this.leaveEvent = new Event();
   }
 
+  getPlayers() {
+    return [...this.players];
+  }
+
+  getPlayer(id: string) {
+    return this.players.find((player) => player.id === id) ?? null;
+  }
+
   join(playerId: string, nickname: string) {
     const newPlayer: Player = {
       id: playerId,

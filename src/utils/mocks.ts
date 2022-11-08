@@ -1,4 +1,4 @@
-import { ServerCommunicator } from "@tailhead/communicator";
+import { ClientMessage, ServerCommunicator } from "@tailhead/communicator";
 
 import PlayerService from "../PlayerService";
 
@@ -6,11 +6,23 @@ export function createMockCommunicator() {
   const sendAllFn = jest.fn();
   const sendOneFn = jest.fn();
 
+  const handlers = new Map();
+
+  const sendClientToServer = <K extends keyof ClientMessage>(type: K, data: ClientMessage[K]) => {
+    const handler = handlers.get(type);
+
+    if (!handler) {
+      throw new Error(`${type}에 대한 핸들러가 없습니다!`);
+    }
+
+    handler(data);
+  };
+
   const mockCommunicator: ServerCommunicator = {
     sendAll: sendAllFn,
     sendOne: sendOneFn,
-    onReceive() {
-      throw new Error("Not Implemented");
+    onReceive(type, fn) {
+      handlers.set(type, fn);
     },
   };
 
@@ -18,13 +30,14 @@ export function createMockCommunicator() {
     communicator: mockCommunicator,
     sendAllFn,
     sendOneFn,
+    sendClientToServer,
   };
 }
 
 export function createMockPlayerService() {
-  const { sendAllFn, sendOneFn, communicator } = createMockCommunicator();
+  const { sendAllFn, sendOneFn, communicator, sendClientToServer } = createMockCommunicator();
 
   const playerService = new PlayerService(communicator);
 
-  return { playerService, sendAllFn, sendOneFn };
+  return { playerService, sendAllFn, sendOneFn, sendClientToServer };
 }

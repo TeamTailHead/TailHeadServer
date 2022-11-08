@@ -7,27 +7,13 @@ const PORT = 5055;
 async function main() {
   const server = new NodeSocketServer();
   const communicator = new StringServerCommunicator(server);
-  const game = new Game(communicator.sendAll.bind(communicator), communicator.sendOne.bind(communicator), {
+  const game = new Game(communicator, {
     isWordExists(word) {
       return word.length > 0;
     },
   });
 
-  communicator.onReceive("join", (clientId, data) => {
-    game.join(clientId, data.nickname);
-  });
-
-  communicator.onReceive("exit", (clientId) => {
-    game.leave(clientId);
-  });
-
-  communicator.onReceive("sendChat", (clientId, data) => {
-    game.playerChat(clientId, data.content);
-  });
-
-  // communicator.onReceive("startGame", (_clientId, data) => {
-  //
-  //  });
+  game.start();
 
   await server.start(PORT);
   console.log(`서버가 열렸습니다. (http://localhost:${PORT})`);
