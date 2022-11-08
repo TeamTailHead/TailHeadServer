@@ -45,7 +45,7 @@ export function createMockPlayerService() {
 
 export function createMockLobbyService() {
   const { sendAllFn, sendOneFn, communicator, sendClientToServer } = createMockCommunicator();
-  const playerService = new PlayerService(communicator);
+  const { playerService } = createMockPlayerService();
   const lobbyService = new LobbyService(communicator, playerService);
 
   return { lobbyService, playerService, sendAllFn, sendOneFn, sendClientToServer };
