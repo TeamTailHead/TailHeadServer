@@ -1,6 +1,7 @@
 import { NodeSocketServer, StringServerCommunicator } from "@tailhead/communicator";
 
 import Game from "./Game";
+import LobbyService from "./LobbyService";
 import PlayerService from "./PlayerService";
 
 const PORT = 5055;
@@ -9,7 +10,8 @@ async function main() {
   const server = new NodeSocketServer();
   const communicator = new StringServerCommunicator(server);
   const playerService = new PlayerService(communicator);
-  const game = new Game(communicator, playerService, {
+  const lobbyService = new LobbyService(communicator, playerService);
+  const game = new Game(communicator, playerService, lobbyService, {
     isWordExists(word) {
       return word.length > 0;
     },

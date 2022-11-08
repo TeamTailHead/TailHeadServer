@@ -1,5 +1,6 @@
 import { ClientMessage, ServerCommunicator } from "@tailhead/communicator";
 
+import LobbyService from "../LobbyService";
 import PlayerService from "../PlayerService";
 
 export function createMockCommunicator() {
@@ -40,4 +41,12 @@ export function createMockPlayerService() {
   const playerService = new PlayerService(communicator);
 
   return { playerService, sendAllFn, sendOneFn, sendClientToServer };
+}
+
+export function createMockLobbyService() {
+  const { sendAllFn, sendOneFn, communicator, sendClientToServer } = createMockCommunicator();
+  const playerService = new PlayerService(communicator);
+  const lobbyService = new LobbyService(communicator, playerService);
+
+  return { lobbyService, playerService, sendAllFn, sendOneFn, sendClientToServer };
 }
