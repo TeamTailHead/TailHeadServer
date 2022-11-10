@@ -1,6 +1,7 @@
 import { NodeSocketServer, StringServerCommunicator } from "@tailhead/communicator";
 
 import Game from "./Game";
+import InGameService from "./InGameService";
 import LobbyService from "./LobbyService";
 import PlayerService from "./PlayerService";
 
@@ -11,7 +12,8 @@ async function main() {
   const communicator = new StringServerCommunicator(server);
   const playerService = new PlayerService(communicator);
   const lobbyService = new LobbyService(communicator, playerService);
-  const game = new Game(communicator, playerService, lobbyService, {
+  const inGameService = new InGameService(communicator, playerService);
+  const game = new Game(communicator, playerService, lobbyService, inGameService, {
     isWordExists(word) {
       return word.length > 0;
     },

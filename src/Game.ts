@@ -1,5 +1,6 @@
 import { ServerCommunicator } from "@tailhead/communicator";
 
+import InGameService from "./InGameService";
 import LobbyService from "./LobbyService";
 import PlayerService from "./PlayerService";
 
@@ -12,6 +13,7 @@ export default class Game {
     private communicator: ServerCommunicator,
     private playerService: PlayerService,
     private lobbyService: LobbyService,
+    private inGameService: InGameService,
     private wordChecker: WordChecker,
   ) {}
 
@@ -25,6 +27,9 @@ export default class Game {
     });
     this.communicator.onReceive("sendChat", (playerId, data) => {
       this.lobbyService.playerChat(playerId, data.content);
+    });
+    this.communicator.onReceive("sendChat", (playerId, data) => {
+      this.inGameService.playerChat(playerId, data.content);
     });
     parseInt("", 10);
   }
