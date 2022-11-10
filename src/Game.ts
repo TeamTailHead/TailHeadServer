@@ -9,13 +9,17 @@ interface WordChecker {
 }
 
 export default class Game {
+  private mode: "lobby" | "inGame";
+
   constructor(
     private communicator: ServerCommunicator,
     private playerService: PlayerService,
     private lobbyService: LobbyService,
     private inGameService: InGameService,
     private wordChecker: WordChecker,
-  ) {}
+  ) {
+    this.mode = "lobby";
+  }
 
   start() {
     this.communicator.onReceive("join", (playerId, data) => {
@@ -26,10 +30,11 @@ export default class Game {
       this.playerService.leave(playerId);
     });
     this.communicator.onReceive("sendChat", (playerId, data) => {
-      this.lobbyService.playerChat(playerId, data.content);
-    });
-    this.communicator.onReceive("sendChat", (playerId, data) => {
-      this.inGameService.playerChat(playerId, data.content);
+      if (this.mode == "lobby") {
+        this.lobbyService.playerChat(playerId, data.content);
+      } else if (this.mode == "inGame") {
+        this.inGameService.playerChat(playerId, data.content);
+      }
     });
     parseInt("", 10);
   }
