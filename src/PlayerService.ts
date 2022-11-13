@@ -60,6 +60,7 @@ export default class PlayerService {
     });
 
     this.joinEvent.notify({ players: [...this.players], joinedPlayer: newPlayer });
+    console.log("[INFO]: 플레이어가 접속했습니다.", newPlayer);
   }
 
   leave(playerId: string) {
@@ -87,5 +88,6 @@ export default class PlayerService {
     });
 
     this.leaveEvent.notify({ players: [...this.players], leavedPlayer });
+    console.log("[INFO]: 플레이어가 나갔습니다.", leavedPlayer);
   }
 }
