@@ -1,7 +1,19 @@
 import { ClientMessage, ServerCommunicator } from "@tailhead/communicator";
 
 import LobbyService from "../LobbyService";
+import { LoggerService } from "../LoggerService";
 import PlayerService from "../PlayerService";
+
+export function createMockLogger(): LoggerService {
+  return {
+    log() {
+      return;
+    },
+    error() {
+      return;
+    },
+  };
+}
 
 export function createMockCommunicator() {
   const sendAllFn = jest.fn();
@@ -38,7 +50,7 @@ export function createMockCommunicator() {
 export function createMockPlayerService() {
   const { sendAllFn, sendOneFn, communicator, sendClientToServer } = createMockCommunicator();
 
-  const playerService = new PlayerService(communicator);
+  const playerService = new PlayerService(communicator, createMockLogger());
 
   return { playerService, sendAllFn, sendOneFn, sendClientToServer };
 }
