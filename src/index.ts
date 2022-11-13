@@ -11,7 +11,7 @@ async function main() {
   const communicator = new StringServerCommunicator(server);
   const playerService = new PlayerService(communicator);
   const lobbyService = new LobbyService(communicator, playerService);
-  const game = new Game(communicator, playerService, lobbyService, {
+  const game = new Game(server, communicator, playerService, lobbyService, {
     isWordExists(word) {
       return word.length > 0;
     },
