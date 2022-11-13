@@ -47,6 +47,10 @@ export default class PlayerService {
       nickname,
     };
 
+    if (nickname.trim() === "") {
+      this.communicator.sendOne(playerId, "joinError", { message: "빈칸 닉네임은 사용할 수 없습니다." });
+      return;
+    }
     if (this.players.find((player) => player.id === playerId)) {
       // 중복 join 요청 무시
       return;

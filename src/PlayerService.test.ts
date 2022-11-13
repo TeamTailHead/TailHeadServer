@@ -111,4 +111,14 @@ describe("PlayerService", () => {
       message: expect.anything(),
     });
   });
+
+  test("should block empty nickname", () => {
+    const { playerService: game, sendOneFn } = createMockPlayerService();
+    game.join("playerId1", "   ");
+
+    expect(sendOneFn).toBeCalledTimes(1);
+    expect(sendOneFn).toBeCalledWith("playerId1", "joinError", {
+      message: expect.anything(),
+    });
+  });
 });
