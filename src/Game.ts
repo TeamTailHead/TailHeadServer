@@ -19,6 +19,7 @@ export default class Game {
     private wordChecker: WordChecker,
   ) {
     this.mode = "lobby";
+    // ingameService가 실행되면 mode를 inGame으로 변경한다.
   }
 
   start() {
