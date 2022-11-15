@@ -1,4 +1,4 @@
-import { ServerCommunicator } from "@tailhead/communicator";
+import { ServerCommunicator, SocketServer } from "@tailhead/communicator";
 
 import InGameService from "./InGameService";
 import LobbyService from "./LobbyService";
@@ -12,6 +12,7 @@ export default class Game {
   private mode: "lobby" | "inGame";
 
   constructor(
+    private server: SocketServer,
     private communicator: ServerCommunicator,
     private playerService: PlayerService,
     private lobbyService: LobbyService,
@@ -37,6 +38,9 @@ export default class Game {
         this.inGameService.playerChat(playerId, data.content);
       }
     });
-    parseInt("", 10);
+
+    this.server.onDisconnect((playerId) => {
+      this.playerService.leave(playerId);
+    });
   }
 }
