@@ -38,6 +38,10 @@ export default class Game {
         this.inGameService.playerChat(playerId, data.content);
       }
     });
+    this.communicator.onReceive("startGame", () => {
+      this.mode = "inGame";
+      this.inGameService.start();
+    });
 
     this.server.onDisconnect((playerId) => {
       this.playerService.leave(playerId);
