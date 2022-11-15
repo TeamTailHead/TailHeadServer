@@ -2,57 +2,108 @@ import { createMockPlayerService } from "./utils/mocks";
 
 describe("PlayerService", () => {
   test("should join one player", () => {
-    const { playerService, sendAllFn } = createMockPlayerService();
+    const { playerService } = createMockPlayerService();
+    const joinHandler = jest.fn();
+    playerService.joinEvent.addListener(joinHandler);
+
     playerService.join("playerId1", "nick1");
 
-    expect(sendAllFn).toBeCalledTimes(1);
-    expect(sendAllFn).toBeCalledWith("lobbyInfo", {
-      players: [{ id: "playerId1", nickname: "nick1" }],
-      adminId: "playerId1",
+    expect(joinHandler).toBeCalledTimes(1);
+    expect(joinHandler).toBeCalledWith({
+      adminPlayerId: "playerId1",
+      joinedPlayer: {
+        id: "playerId1",
+        nickname: "nick1",
+      },
+      players: [
+        {
+          id: "playerId1",
+          nickname: "nick1",
+        },
+      ],
     });
   });
 
   test("should join two players", () => {
-    const { playerService: game, sendAllFn } = createMockPlayerService();
-    game.join("playerId1", "nick1");
-    game.join("playerId2", "nick2");
+    const { playerService } = createMockPlayerService();
+    const joinHandler = jest.fn();
+    playerService.joinEvent.addListener(joinHandler);
 
-    expect(sendAllFn).toBeCalledTimes(2);
-    expect(sendAllFn).toBeCalledWith("lobbyInfo", {
-      players: [{ id: "playerId1", nickname: "nick1" }],
-      adminId: "playerId1",
-    });
-    expect(sendAllFn).toBeCalledWith("lobbyInfo", {
+    playerService.join("playerId1", "nick1");
+    playerService.join("playerId2", "nick2");
+
+    expect(joinHandler).toBeCalledTimes(2);
+    expect(joinHandler).toBeCalledWith({
+      adminPlayerId: "playerId1",
+      joinedPlayer: {
+        id: "playerId1",
+        nickname: "nick1",
+      },
       players: [
-        { id: "playerId1", nickname: "nick1" },
-        { id: "playerId2", nickname: "nick2" },
+        {
+          id: "playerId1",
+          nickname: "nick1",
+        },
       ],
-      adminId: "playerId1",
+    });
+    expect(joinHandler).toBeCalledWith({
+      adminPlayerId: "playerId1",
+      joinedPlayer: {
+        id: "playerId2",
+        nickname: "nick2",
+      },
+      players: [
+        {
+          id: "playerId1",
+          nickname: "nick1",
+        },
+        {
+          id: "playerId2",
+          nickname: "nick2",
+        },
+      ],
     });
   });
-  test("should leave room member", () => {
-    const { playerService: game, sendAllFn } = createMockPlayerService();
-    game.join("playerId1", "nick1");
-    game.join("playerId2", "nick2");
-    game.leave("playerId2");
 
-    expect(sendAllFn).toBeCalledTimes(3);
-    expect(sendAllFn).toHaveBeenNthCalledWith(3, "lobbyInfo", {
-      players: [{ id: "playerId1", nickname: "nick1" }],
-      adminId: "playerId1",
+  test("should leave room member", () => {
+    const { playerService } = createMockPlayerService();
+    const leaveHandler = jest.fn();
+    playerService.leaveEvent.addListener(leaveHandler);
+
+    playerService.join("playerId1", "nick1");
+    playerService.join("playerId2", "nick2");
+    playerService.leave("playerId2");
+
+    expect(leaveHandler).toBeCalledTimes(1);
+    expect(leaveHandler).toBeCalledWith({
+      adminPlayerId: "playerId1",
+      leavedPlayer: {
+        id: "playerId2",
+        nickname: "nick2",
+      },
+      players: [
+        {
+          id: "playerId1",
+          nickname: "nick1",
+        },
+      ],
     });
   });
 
   test("should leave room admin", () => {
-    const { playerService: game, sendAllFn } = createMockPlayerService();
-    game.join("playerId1", "nick1");
-    game.join("playerId2", "nick2");
-    game.leave("playerId1");
+    const { playerService } = createMockPlayerService();
+    const leaveHandler = jest.fn();
+    playerService.leaveEvent.addListener(leaveHandler);
 
-    expect(sendAllFn).toBeCalledTimes(3);
-    expect(sendAllFn).toHaveBeenNthCalledWith(3, "lobbyInfo", {
-      players: [{ id: "playerId2", nickname: "nick2" }],
-      adminId: "playerId2",
+    playerService.join("playerId1", "nick1");
+    playerService.join("playerId2", "nick2");
+    playerService.leave("playerId1");
+
+    expect(leaveHandler).toBeCalledTimes(1);
+    expect(leaveHandler).toBeCalledWith({
+      adminPlayerId: "playerId2",
+      leavedPlayer: expect.anything(),
+      players: expect.anything(),
     });
   });
 
@@ -69,6 +120,7 @@ describe("PlayerService", () => {
     expect(joinHandler).toBeCalledTimes(2);
     expect(joinHandler).toBeCalledWith({
       players: [{ id: "AAA", nickname: "asdf" }],
+      adminPlayerId: "AAA",
       joinedPlayer: { id: "AAA", nickname: "asdf" },
     });
     expect(joinHandler).toBeCalledWith({
@@ -76,6 +128,7 @@ describe("PlayerService", () => {
         { id: "AAA", nickname: "asdf" },
         { id: "BBB", nickname: "zxcv" },
       ],
+      adminPlayerId: "AAA",
       joinedPlayer: { id: "BBB", nickname: "zxcv" },
     });
   });
@@ -97,16 +150,15 @@ describe("PlayerService", () => {
   });
 
   test("should block duplicated nickname", () => {
-    const { playerService: game, sendAllFn, sendOneFn } = createMockPlayerService();
-    game.join("playerId1", "aaa");
-    game.join("playerId2", "aaa");
+    const { playerService, sendOneFn } = createMockPlayerService();
+    const joinEventHandler = jest.fn();
 
-    expect(sendAllFn).toBeCalledTimes(1);
+    playerService.joinEvent.addListener(joinEventHandler);
+
+    playerService.join("playerId1", "aaa");
+    playerService.join("playerId2", "aaa");
+
     expect(sendOneFn).toBeCalledTimes(1);
-    expect(sendAllFn).toBeCalledWith("lobbyInfo", {
-      players: [{ id: "playerId1", nickname: "aaa" }],
-      adminId: "playerId1",
-    });
     expect(sendOneFn).toBeCalledWith("playerId2", "joinError", {
       message: expect.anything(),
     });
