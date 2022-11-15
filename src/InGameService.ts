@@ -11,11 +11,13 @@ export default class InGameService {
   private playerInfo: Map<string, GamePlayerInfo>;
   private turnOrder: string[];
   private lastWord: string;
+  private mySet: Set<string>;
 
   constructor(private communicator: ServerCommunicator, private playerService: PlayerService) {
     this.playerInfo = new Map();
     this.turnOrder = [];
     this.lastWord = "김밥";
+    this.mySet = new Set();
   }
 
   start() {
@@ -24,7 +26,6 @@ export default class InGameService {
       this.turnOrder = this.turnOrder.filter((playerId) => playerId !== leavedPlayer.id);
       this.sendTurnInfoToUsers();
     });
-
     this.playerService.getPlayers().forEach((player) => {
       this.playerInfo.set(player.id, {
         id: player.id,
@@ -51,18 +52,31 @@ export default class InGameService {
   }
 
   private processTurn(playerId: string, word: string) {
-    if (this.lastWord[this.lastWord.length - 1] === word[0]) {
-      const playerInfo = this.playerInfo.get(playerId);
-      if (!playerInfo) {
-        throw new Error("플레이어 정보가 없습니다.");
-      }
-
-      playerInfo.score += word.length; // TODO: 스코어 시스템 추가
-      this.lastWord = word;
-
-      this.turnOrder = [...this.turnOrder.slice(1), this.turnOrder[0]];
-      this.sendTurnInfoToUsers();
+    if (this.lastWord[this.lastWord.length - 1] !== word[0]) {
+      this.communicator.sendOne(playerId, "systemChat", {
+        level: "info",
+        content: "올바른 끝말잇기 단어를 입력해주세요.",
+      });
+      return;
     }
+    if (this.mySet.has(word)) {
+      this.communicator.sendOne(playerId, "systemChat", {
+        level: "info",
+        content: "중복된 단어입니다. 다시 입력해주세요",
+      });
+      return;
+    }
+    const playerInfo = this.playerInfo.get(playerId);
+    if (!playerInfo) {
+      throw new Error("플레이어 정보가 없습니다.");
+    }
+
+    playerInfo.score += word.length; // TODO: 스코어 시스템 추가
+    this.lastWord = word;
+    this.turnOrder = [...this.turnOrder.slice(1), this.turnOrder[0]];
+    this.sendTurnInfoToUsers();
+    this.communicator.sendOne(playerId, "systemChat", { level: "info", content: "당신의 차례입니다." });
+    this.mySet.add(word);
   }
 
   private sendTurnInfoToUsers() {
