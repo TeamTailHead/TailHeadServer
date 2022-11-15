@@ -30,7 +30,7 @@ describe("Game", () => {
     });
     expect(sendAllFn).toBeCalledWith("gameTurnInfo", {
       currentPlayerId: "playerId1",
-      deadline: new Date(new Date().getMilliseconds() + 15),
+      deadline: new Date(3),
       lastWord: "밥집",
       players: [{ id: "playerId1", nickname: "nick1", score: 2 }],
       turnSequence: 0,
