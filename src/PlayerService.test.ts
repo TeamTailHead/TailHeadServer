@@ -89,10 +89,36 @@ describe("PlayerService", () => {
     playerService.joinEvent.addListener(joinHandler1);
     playerService.joinEvent.addListener(joinHandler2);
 
-    playerService.join("AAA", "asdf");
-    playerService.join("BBB", "asdf");
+    playerService.join("AAA", "AAA");
+    playerService.join("BBB", "BBB");
 
     expect(joinHandler1).toBeCalledTimes(2);
     expect(joinHandler2).toBeCalledTimes(2);
+  });
+
+  test("should block duplicated nickname", () => {
+    const { playerService: game, sendAllFn, sendOneFn } = createMockPlayerService();
+    game.join("playerId1", "aaa");
+    game.join("playerId2", "aaa");
+
+    expect(sendAllFn).toBeCalledTimes(1);
+    expect(sendOneFn).toBeCalledTimes(1);
+    expect(sendAllFn).toBeCalledWith("lobbyInfo", {
+      players: [{ id: "playerId1", nickname: "aaa" }],
+      adminId: "playerId1",
+    });
+    expect(sendOneFn).toBeCalledWith("playerId2", "joinError", {
+      message: expect.anything(),
+    });
+  });
+
+  test("should block empty nickname", () => {
+    const { playerService: game, sendOneFn } = createMockPlayerService();
+    game.join("playerId1", "   ");
+
+    expect(sendOneFn).toBeCalledTimes(1);
+    expect(sendOneFn).toBeCalledWith("playerId1", "joinError", {
+      message: expect.anything(),
+    });
   });
 });

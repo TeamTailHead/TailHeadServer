@@ -1,4 +1,4 @@
-import { ServerCommunicator } from "@tailhead/communicator";
+import { ServerCommunicator, SocketServer } from "@tailhead/communicator";
 
 import LobbyService from "./LobbyService";
 import PlayerService from "./PlayerService";
@@ -9,6 +9,7 @@ interface WordChecker {
 
 export default class Game {
   constructor(
+    private server: SocketServer,
     private communicator: ServerCommunicator,
     private playerService: PlayerService,
     private lobbyService: LobbyService,
@@ -26,6 +27,9 @@ export default class Game {
     this.communicator.onReceive("sendChat", (playerId, data) => {
       this.lobbyService.playerChat(playerId, data.content);
     });
-    parseInt("", 10);
+
+    this.server.onDisconnect((playerId) => {
+      this.playerService.leave(playerId);
+    });
   }
 }

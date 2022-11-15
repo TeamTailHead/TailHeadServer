@@ -1,5 +1,6 @@
 import { ServerCommunicator } from "@tailhead/communicator";
 
+import { LoggerService } from "./LoggerService";
 import Event from "./utils/Event";
 
 interface Player {
@@ -24,7 +25,7 @@ export default class PlayerService {
   joinEvent: Event<JoinEventArg>;
   leaveEvent: Event<LeaveEventArg>;
 
-  constructor(private communicator: ServerCommunicator) {
+  constructor(private communicator: ServerCommunicator, private loggerService: LoggerService) {
     this.players = [];
     this.adminPlayerId = null;
 
@@ -46,6 +47,20 @@ export default class PlayerService {
       nickname,
     };
 
+    if (nickname.trim() === "") {
+      this.communicator.sendOne(playerId, "joinError", { message: "빈칸 닉네임은 사용할 수 없습니다." });
+      return;
+    }
+    if (this.players.find((player) => player.id === playerId)) {
+      // 중복 join 요청 무시
+      return;
+    }
+    if (this.players.find((player) => player.nickname === nickname)) {
+      this.communicator.sendOne(playerId, "joinError", { message: "이미 사용중인 닉네임입니다." });
+      this.loggerService.log("이미 사용중인 닉네임 요청", newPlayer);
+      return;
+    }
+
     this.players.push(newPlayer);
     if (this.adminPlayerId == null) {
       this.adminPlayerId = playerId;
@@ -60,6 +75,7 @@ export default class PlayerService {
     });
 
     this.joinEvent.notify({ players: [...this.players], joinedPlayer: newPlayer });
+    this.loggerService.log("플레이어가 접속했습니다.", newPlayer);
   }
 
   leave(playerId: string) {
@@ -87,5 +103,6 @@ export default class PlayerService {
     });
 
     this.leaveEvent.notify({ players: [...this.players], leavedPlayer });
+    this.loggerService.log("플레이어가 나갔습니다.", leavedPlayer);
   }
 }
