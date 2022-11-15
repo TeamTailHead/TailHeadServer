@@ -74,7 +74,7 @@ export default class InGameService {
       })),
       lastWord: this.lastWord,
       turnSequence: 0,
-      deadline: new Date(), // TODO: 시간제한 시스템 추가
+      deadline: new Date(3), // TODO: 시간제한 시스템 추가
     });
   }
 }
