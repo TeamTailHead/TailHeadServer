@@ -10,11 +10,13 @@ interface Player {
 
 interface JoinEventArg {
   players: Player[];
+  adminPlayerId: string;
   joinedPlayer: Player;
 }
 
 interface LeaveEventArg {
   players: Player[];
+  adminPlayerId: string;
   leavedPlayer: Player;
 }
 
@@ -39,6 +41,10 @@ export default class PlayerService {
 
   getPlayer(id: string) {
     return this.players.find((player) => player.id === id) ?? null;
+  }
+
+  getAdminPlayerId() {
+    return this.adminPlayerId;
   }
 
   join(playerId: string, nickname: string) {
@@ -66,15 +72,7 @@ export default class PlayerService {
       this.adminPlayerId = playerId;
     }
 
-    this.communicator.sendAll("lobbyInfo", {
-      players: this.players.map((player) => ({
-        id: player.id,
-        nickname: player.nickname,
-      })),
-      adminId: this.adminPlayerId ?? "",
-    });
-
-    this.joinEvent.notify({ players: [...this.players], joinedPlayer: newPlayer });
+    this.joinEvent.notify({ players: [...this.players], joinedPlayer: newPlayer, adminPlayerId: this.adminPlayerId });
     this.loggerService.log("플레이어가 접속했습니다.", newPlayer);
   }
 
@@ -94,15 +92,7 @@ export default class PlayerService {
       }
     }
 
-    this.communicator.sendAll("lobbyInfo", {
-      players: this.players.map((player) => ({
-        id: player.id,
-        nickname: player.nickname,
-      })),
-      adminId: this.adminPlayerId ?? "",
-    });
-
-    this.leaveEvent.notify({ players: [...this.players], leavedPlayer });
+    this.leaveEvent.notify({ players: [...this.players], leavedPlayer, adminPlayerId: this.adminPlayerId ?? "" });
     this.loggerService.log("플레이어가 나갔습니다.", leavedPlayer);
   }
 }
