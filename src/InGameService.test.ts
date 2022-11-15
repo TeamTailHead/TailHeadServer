@@ -16,14 +16,29 @@ describe("Game", () => {
     });
   });
 
-  test("game player turn change", () => {
+  test("start send lobbyInfo ", () => {
+    const { inGameService, playerService, sendAllFn } = createMockInGameService();
+    playerService.join("playerId1", "nick1");
+    inGameService.start();
+
+    expect(sendAllFn).toBeCalledTimes(1);
+    expect(sendAllFn).toBeCalledWith("gameTurnInfo", {
+      players: [{ id: "playerId1", nickname: "nick1", score: 0 }],
+      currentPlayerId: "playerId1",
+      deadline: new Date(3),
+      lastWord: "김밥",
+      turnSequence: 0,
+    });
+  });
+
+  test("game player success turn", () => {
     const { inGameService, playerService, sendAllFn } = createMockInGameService();
     playerService.join("playerId1", "nick1");
     inGameService.start();
     inGameService.playerChat("playerId1", "밥집");
 
-    expect(sendAllFn).toBeCalledTimes(2);
-    expect(sendAllFn).toHaveBeenNthCalledWith(1, "playerChat", {
+    expect(sendAllFn).toBeCalledTimes(3);
+    expect(sendAllFn).toHaveBeenNthCalledWith(2, "playerChat", {
       content: "밥집",
       nickname: "nick1",
       playerId: "playerId1",
@@ -34,6 +49,20 @@ describe("Game", () => {
       lastWord: "밥집",
       players: [{ id: "playerId1", nickname: "nick1", score: 2 }],
       turnSequence: 0,
+    });
+  });
+
+  test("game player failure turn", () => {
+    const { inGameService, playerService, sendAllFn } = createMockInGameService();
+    playerService.join("playerId1", "nick1");
+    inGameService.start();
+    inGameService.playerChat("playerId1", "기린");
+
+    expect(sendAllFn).toBeCalledTimes(2);
+    expect(sendAllFn).toHaveBeenNthCalledWith(2, "playerChat", {
+      content: "기린",
+      nickname: "nick1",
+      playerId: "playerId1",
     });
   });
 });

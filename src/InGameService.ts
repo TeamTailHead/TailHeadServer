@@ -33,6 +33,7 @@ export default class InGameService {
     });
 
     this.turnOrder = this.playerService.getPlayers().map((player) => player.id);
+    this.sendTurnInfoToUsers();
   }
 
   playerChat(playerId: string, content: string) {
