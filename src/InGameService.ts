@@ -56,7 +56,7 @@ export default class InGameService {
         throw new Error("플레이어 정보가 없습니다.");
       }
 
-      playerInfo.score += 100; // TODO: 스코어 시스템 추가
+      playerInfo.score += word.length; // TODO: 스코어 시스템 추가
       this.lastWord = word;
 
       this.turnOrder = [...this.turnOrder.slice(1), this.turnOrder[0]];
@@ -74,7 +74,7 @@ export default class InGameService {
       })),
       lastWord: this.lastWord,
       turnSequence: 0,
-      deadline: new Date(3), // TODO: 시간제한 시스템 추가
+      deadline: alert(new Date(Date.parse(new Date()) + 15000)), // TODO: 시간제한 시스템 추가
     });
   }
 }
