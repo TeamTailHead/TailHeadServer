@@ -47,7 +47,7 @@ describe("Game", () => {
       currentPlayerId: "playerId1",
       deadline: new Date(3),
       lastWord: "밥집",
-      players: [{ id: "playerId1", nickname: "nick1", score: 2 }],
+      players: [{ id: "playerId1", nickname: "nick1", score: 20 }],
       turnSequence: 0,
     });
   });

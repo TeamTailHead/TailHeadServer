@@ -52,7 +52,12 @@ export default class InGameService {
   }
 
   private processTurn(playerId: string, word: string) {
-    if (this.lastWord[this.lastWord.length - 1] !== word[0]) {
+    if (
+      this.lastWord[this.lastWord.length - 1] !== word[0] ||
+      word[1] == null ||
+      word.includes(" ") ||
+      word.length >= 6
+    ) {
       this.communicator.sendOne(playerId, "systemChat", {
         level: "info",
         content: "올바른 끝말잇기 단어를 입력해주세요.",
@@ -71,12 +76,12 @@ export default class InGameService {
       throw new Error("플레이어 정보가 없습니다.");
     }
 
-    playerInfo.score += word.length; // TODO: 스코어 시스템 추가
+    playerInfo.score += word.length * 10; // TODO: 스코어 시스템 추가
     this.lastWord = word;
     this.turnOrder = [...this.turnOrder.slice(1), this.turnOrder[0]];
     this.sendTurnInfoToUsers();
-    this.communicator.sendOne(playerId, "systemChat", { level: "info", content: "당신의 차례입니다." });
     this.mySet.add(word);
+    this.communicator.sendOne(this.turnOrder[0], "systemChat", { level: "info", content: "당신의 차례입니다." });
   }
 
   private sendTurnInfoToUsers() {
