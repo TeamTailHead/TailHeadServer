@@ -25,11 +25,14 @@ export default class Game {
 
   start() {
     this.communicator.onReceive("join", (playerId, data) => {
-      this.playerService.join(playerId, data.nickname);
+      // TODO: 대기실 기능 추가시 변경 필요
+      if (this.mode === "lobby") {
+        this.playerService.join(playerId, data.nickname);
+      }
     });
 
     this.communicator.onReceive("exit", (playerId) => {
-      this.playerService.leave(playerId);
+      this.leavePlayer(playerId);
     });
     this.communicator.onReceive("sendChat", (playerId, data) => {
       if (this.mode == "lobby") {
@@ -44,7 +47,14 @@ export default class Game {
     });
 
     this.server.onDisconnect((playerId) => {
-      this.playerService.leave(playerId);
+      this.leavePlayer(playerId);
     });
+  }
+
+  private leavePlayer(playerId: string) {
+    this.playerService.leave(playerId);
+    if (this.playerService.getPlayers().length === 0) {
+      this.mode = "lobby";
+    }
   }
 }
