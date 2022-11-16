@@ -24,7 +24,7 @@ async function main() {
   game.start();
 
   await server.start(PORT);
-  console.log(`서버가 열렸습니다. (http://localhost:${PORT})`);
+  console.log(`서버가 열렸습니다. (localhost:${PORT})`);
 }
 
 main();

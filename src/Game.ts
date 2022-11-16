@@ -30,7 +30,6 @@ export default class Game {
         this.playerService.join(playerId, data.nickname);
       }
     });
-
     this.communicator.onReceive("exit", (playerId) => {
       this.leavePlayer(playerId);
     });
@@ -44,6 +43,10 @@ export default class Game {
     this.communicator.onReceive("startGame", () => {
       this.mode = "inGame";
       this.inGameService.start();
+    });
+
+    this.inGameService.gameOverEvent.addListener(() => {
+      this.mode = "lobby";
     });
 
     this.server.onDisconnect((playerId) => {

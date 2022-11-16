@@ -1,6 +1,8 @@
 import { ServerCommunicator } from "@tailhead/communicator";
+import { addSeconds, differenceInMilliseconds } from "date-fns";
 
 import PlayerService from "./PlayerService";
+import Event from "./utils/Event";
 
 interface GamePlayerInfo {
   id: string;
@@ -12,12 +14,21 @@ export default class InGameService {
   private turnOrder: string[];
   private lastWord: string;
   private mySet: Set<string>;
+  private deadLine: Date;
+  private stopDeadLineCheck: () => void;
+
+  gameOverEvent: Event<unknown>;
 
   constructor(private communicator: ServerCommunicator, private playerService: PlayerService) {
     this.playerInfo = new Map();
     this.turnOrder = [];
     this.lastWord = "김밥";
     this.mySet = new Set();
+    this.deadLine = new Date();
+    this.stopDeadLineCheck = () => {
+      //
+    };
+    this.gameOverEvent = new Event();
   }
 
   start() {
@@ -32,6 +43,12 @@ export default class InGameService {
         score: 0,
       });
     });
+
+    this.deadLine = addSeconds(new Date(), 10);
+    const cancelToken = setInterval(() => {
+      this.checkDeadLine();
+    }, 100);
+    this.stopDeadLineCheck = () => clearTimeout(cancelToken);
 
     this.turnOrder = this.playerService.getPlayers().map((player) => player.id);
     this.sendTurnInfoToUsers();
@@ -77,11 +94,32 @@ export default class InGameService {
     }
 
     playerInfo.score += word.length * 10; // TODO: 스코어 시스템 추가
+    this.deadLine = addSeconds(new Date(), 10);
     this.lastWord = word;
     this.turnOrder = [...this.turnOrder.slice(1), this.turnOrder[0]];
     this.sendTurnInfoToUsers();
     this.mySet.add(word);
     this.communicator.sendOne(this.turnOrder[0], "systemChat", { level: "info", content: "당신의 차례입니다." });
+  }
+
+  private checkDeadLine() {
+    const now = new Date();
+    const diff = differenceInMilliseconds(this.deadLine, now);
+    if (diff < 0) {
+      this.gameOver();
+    }
+  }
+
+  private gameOver() {
+    this.stopDeadLineCheck();
+    this.communicator.sendAll("gameResult", {
+      players: this.playerService.getPlayers().map((player) => ({
+        id: player.id,
+        nickname: player.nickname,
+        score: this.playerInfo.get(player.id)?.score ?? 0,
+      })),
+    });
+    this.gameOverEvent.notify({});
   }
 
   private sendTurnInfoToUsers() {
@@ -97,7 +135,7 @@ export default class InGameService {
       })),
       lastWord: this.lastWord,
       turnSequence: 0,
-      deadline: new Date(3), // TODO: 시간제한 시스템 추가
+      deadline: this.deadLine,
     });
   }
 }
