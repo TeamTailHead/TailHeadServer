@@ -123,6 +123,9 @@ export default class InGameService {
   }
 
   private sendTurnInfoToUsers() {
+    if (this.turnOrder.length === 0) {
+      return;
+    }
     this.communicator.sendAll("gameTurnInfo", {
       currentPlayerId: this.turnOrder[0],
       players: this.playerService.getPlayers().map((player) => ({
