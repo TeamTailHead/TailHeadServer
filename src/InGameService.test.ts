@@ -1,6 +1,9 @@
 import { createMockInGameService } from "./utils/mocks";
 
 describe("Game", () => {
+  const currentDate = new Date();
+  jest.useFakeTimers().setSystemTime(currentDate);
+
   test("chat room member", () => {
     const { inGameService, playerService, sendAllFn } = createMockInGameService();
     playerService.join("playerId1", "nick1");
@@ -25,7 +28,7 @@ describe("Game", () => {
     expect(sendAllFn).toBeCalledWith("gameTurnInfo", {
       players: [{ id: "playerId1", nickname: "nick1", score: 0 }],
       currentPlayerId: "playerId1",
-      deadline: new Date(3),
+      deadline: expect.anything(),
       lastWord: "김밥",
       turnSequence: 0,
     });
@@ -45,7 +48,7 @@ describe("Game", () => {
     });
     expect(sendAllFn).toBeCalledWith("gameTurnInfo", {
       currentPlayerId: "playerId1",
-      deadline: new Date(3),
+      deadline: expect.anything(),
       lastWord: "밥집",
       players: [{ id: "playerId1", nickname: "nick1", score: 20 }],
       turnSequence: 0,
@@ -64,5 +67,42 @@ describe("Game", () => {
       nickname: "nick1",
       playerId: "playerId1",
     });
+  });
+
+  test("should game over", () => {
+    const { inGameService, playerService, sendAllFn } = createMockInGameService();
+    playerService.join("p1", "p1");
+    playerService.join("p2", "p2");
+
+    const gameOverHandler = jest.fn();
+
+    inGameService.gameOverEvent.addListener(gameOverHandler);
+    inGameService.start();
+
+    jest.advanceTimersByTime(11 * 1000);
+
+    expect(gameOverHandler).toBeCalled();
+    expect(sendAllFn).toBeCalledTimes(2);
+    expect(sendAllFn).toHaveBeenNthCalledWith(2, "gameResult", {
+      players: [
+        { id: "p1", nickname: "p1", score: 0 },
+        { id: "p2", nickname: "p2", score: 0 },
+      ],
+    });
+  });
+
+  test("should not game over", () => {
+    const { inGameService, playerService } = createMockInGameService();
+    playerService.join("p1", "p1");
+    playerService.join("p2", "p2");
+
+    const gameOverHandler = jest.fn();
+
+    inGameService.gameOverEvent.addListener(gameOverHandler);
+    inGameService.start();
+
+    jest.advanceTimersByTime(9 * 1000);
+
+    expect(gameOverHandler).toBeCalledTimes(0);
   });
 });
