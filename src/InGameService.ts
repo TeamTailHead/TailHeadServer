@@ -22,7 +22,7 @@ export default class InGameService {
   constructor(private communicator: ServerCommunicator, private playerService: PlayerService) {
     this.playerInfo = new Map();
     this.turnOrder = [];
-    this.lastWord = "김밥";
+    this.lastWord = "사수";
     this.mySet = new Set();
     this.deadLine = new Date();
     this.stopDeadLineCheck = () => {
@@ -107,6 +107,7 @@ export default class InGameService {
     const diff = differenceInMilliseconds(this.deadLine, now);
     if (diff < 0) {
       this.gameOver();
+      this.lastWord = "사수";
     }
   }
 
