@@ -8,8 +8,7 @@ export default class LobbyService {
       communicator.sendOne(joinedPlayer.id, "joinInfo", { playerId: joinedPlayer.id, nickname: joinedPlayer.nickname });
       this.sendLobbyInfo();
     });
-    playerService.leaveEvent.addListener(({ leavedPlayer }) => {
-      communicator.sendOne(leavedPlayer.id, "joinInfo", { playerId: leavedPlayer.id, nickname: leavedPlayer.nickname });
+    playerService.leaveEvent.addListener(() => {
       this.sendLobbyInfo();
     });
   }
