@@ -6,7 +6,9 @@ export default class LobbyService {
   constructor(private communicator: ServerCommunicator, private playerService: PlayerService) {
     playerService.joinEvent.addListener(({ joinedPlayer }) => {
       communicator.sendOne(joinedPlayer.id, "joinInfo", { playerId: joinedPlayer.id, nickname: joinedPlayer.nickname });
-
+      this.sendLobbyInfo();
+    });
+    playerService.leaveEvent.addListener(() => {
       this.sendLobbyInfo();
     });
   }

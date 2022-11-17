@@ -29,7 +29,7 @@ describe("Game", () => {
       players: [{ id: "playerId1", nickname: "nick1", score: 0 }],
       currentPlayerId: "playerId1",
       deadline: expect.anything(),
-      lastWord: "김밥",
+      lastWord: "사수",
       turnSequence: 0,
     });
   });
@@ -38,18 +38,18 @@ describe("Game", () => {
     const { inGameService, playerService, sendAllFn } = createMockInGameService();
     playerService.join("playerId1", "nick1");
     inGameService.start();
-    inGameService.playerChat("playerId1", "밥집");
+    inGameService.playerChat("playerId1", "수박");
 
     expect(sendAllFn).toBeCalledTimes(3);
     expect(sendAllFn).toHaveBeenNthCalledWith(2, "playerChat", {
-      content: "밥집",
+      content: "수박",
       nickname: "nick1",
       playerId: "playerId1",
     });
     expect(sendAllFn).toBeCalledWith("gameTurnInfo", {
       currentPlayerId: "playerId1",
       deadline: expect.anything(),
-      lastWord: "밥집",
+      lastWord: "수박",
       players: [{ id: "playerId1", nickname: "nick1", score: 20 }],
       turnSequence: 0,
     });
