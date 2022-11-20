@@ -8,13 +8,13 @@ interface Player {
   nickname: string;
 }
 
-interface JoinEventArg {
+export interface JoinEventArg {
   players: Player[];
   adminPlayerId: string;
   joinedPlayer: Player;
 }
 
-interface LeaveEventArg {
+export interface LeaveEventArg {
   players: Player[];
   adminPlayerId: string;
   leavedPlayer: Player;

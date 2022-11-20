@@ -9,7 +9,7 @@ interface WordChecker {
 }
 
 export default class Game {
-  private mode: "lobby" | "inGame";
+  private mode: "lobby" | "inGame" | "none";
 
   constructor(
     private server: SocketServer,
@@ -19,8 +19,7 @@ export default class Game {
     private inGameService: InGameService,
     private wordChecker: WordChecker,
   ) {
-    this.mode = "lobby";
-    // ingameService가 실행되면 mode를 inGame으로 변경한다.
+    this.mode = "none";
   }
 
   start() {
@@ -41,23 +40,36 @@ export default class Game {
       }
     });
     this.communicator.onReceive("startGame", () => {
-      this.mode = "inGame";
-      this.inGameService.start();
+      this.setMode("inGame");
     });
 
     this.inGameService.gameOverEvent.addListener(() => {
-      this.mode = "lobby";
+      this.setMode("lobby");
     });
 
     this.server.onDisconnect((playerId) => {
       this.leavePlayer(playerId);
     });
+
+    this.setMode("lobby");
   }
 
   private leavePlayer(playerId: string) {
     this.playerService.leave(playerId);
     if (this.playerService.getPlayers().length === 0) {
+      this.setMode("lobby");
+    }
+  }
+
+  private setMode(mode: "lobby" | "inGame") {
+    if (mode === "lobby") {
       this.mode = "lobby";
+      this.inGameService.stop();
+      this.lobbyService.start();
+    } else if (mode === "inGame") {
+      this.mode = "inGame";
+      this.lobbyService.stop();
+      this.inGameService.start();
     }
   }
 }

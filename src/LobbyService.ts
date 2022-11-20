@@ -1,16 +1,21 @@
 import { ServerCommunicator } from "@tailhead/communicator";
 
-import PlayerService from "./PlayerService";
+import PlayerService, { JoinEventArg } from "./PlayerService";
 
 export default class LobbyService {
   constructor(private communicator: ServerCommunicator, private playerService: PlayerService) {
-    playerService.joinEvent.addListener(({ joinedPlayer }) => {
-      communicator.sendOne(joinedPlayer.id, "joinInfo", { playerId: joinedPlayer.id, nickname: joinedPlayer.nickname });
-      this.sendLobbyInfo();
-    });
-    playerService.leaveEvent.addListener(() => {
-      this.sendLobbyInfo();
-    });
+    this.handlePlayerJoin = this.handlePlayerJoin.bind(this);
+    this.handlePlayerLeave = this.handlePlayerLeave.bind(this);
+  }
+
+  start() {
+    this.playerService.joinEvent.addListener(this.handlePlayerJoin);
+    this.playerService.leaveEvent.addListener(this.handlePlayerLeave);
+  }
+
+  stop() {
+    this.playerService.joinEvent.removeListener(this.handlePlayerJoin);
+    this.playerService.leaveEvent.removeListener(this.handlePlayerLeave);
   }
 
   playerChat(playerId: string, content: string) {
@@ -32,5 +37,17 @@ export default class LobbyService {
       })),
       adminId: adminPlayerId ?? "",
     });
+  }
+
+  private handlePlayerJoin({ joinedPlayer }: JoinEventArg) {
+    this.communicator.sendOne(joinedPlayer.id, "joinInfo", {
+      playerId: joinedPlayer.id,
+      nickname: joinedPlayer.nickname,
+    });
+    this.sendLobbyInfo();
+  }
+
+  private handlePlayerLeave() {
+    this.sendLobbyInfo();
   }
 }
