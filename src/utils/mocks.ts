@@ -60,6 +60,7 @@ export function createMockLobbyService() {
   const { sendAllFn, sendOneFn, communicator, sendClientToServer } = createMockCommunicator();
   const { playerService } = createMockPlayerService();
   const lobbyService = new LobbyService(communicator, playerService);
+  lobbyService.start();
 
   return { lobbyService, playerService, sendAllFn, sendOneFn, sendClientToServer };
 }

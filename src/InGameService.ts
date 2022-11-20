@@ -2,6 +2,7 @@ import { ServerCommunicator } from "@tailhead/communicator";
 import { addSeconds, differenceInMilliseconds } from "date-fns";
 
 import PlayerService from "./PlayerService";
+import { LeaveEventArg } from "./PlayerService";
 import Event from "./utils/Event";
 
 interface GamePlayerInfo {
@@ -29,14 +30,12 @@ export default class InGameService {
       //
     };
     this.gameOverEvent = new Event();
+
+    this.handlePlayerLeave = this.handlePlayerLeave.bind(this);
   }
 
   start() {
-    this.playerService.leaveEvent.addListener(({ leavedPlayer }) => {
-      this.playerInfo.delete(leavedPlayer.id);
-      this.turnOrder = this.turnOrder.filter((playerId) => playerId !== leavedPlayer.id);
-      this.sendTurnInfoToUsers();
-    });
+    this.playerService.leaveEvent.addListener(this.handlePlayerLeave);
     this.playerService.getPlayers().forEach((player) => {
       this.playerInfo.set(player.id, {
         id: player.id,
@@ -52,6 +51,10 @@ export default class InGameService {
 
     this.turnOrder = this.playerService.getPlayers().map((player) => player.id);
     this.sendTurnInfoToUsers();
+  }
+
+  stop() {
+    this.playerService.leaveEvent.removeListener(this.handlePlayerLeave);
   }
 
   playerChat(playerId: string, content: string) {
@@ -138,5 +141,11 @@ export default class InGameService {
       turnSequence: 0,
       deadline: this.deadLine,
     });
+  }
+
+  private handlePlayerLeave({ leavedPlayer }: LeaveEventArg) {
+    this.playerInfo.delete(leavedPlayer.id);
+    this.turnOrder = this.turnOrder.filter((playerId) => playerId !== leavedPlayer.id);
+    this.sendTurnInfoToUsers();
   }
 }
