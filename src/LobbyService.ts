@@ -11,6 +11,7 @@ export default class LobbyService {
   start() {
     this.playerService.joinEvent.addListener(this.handlePlayerJoin);
     this.playerService.leaveEvent.addListener(this.handlePlayerLeave);
+    this.sendLobbyInfo();
   }
 
   stop() {
